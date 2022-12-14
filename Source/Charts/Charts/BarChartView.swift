@@ -17,6 +17,8 @@ open class BarChartView: BarLineChartViewBase, BarChartDataProvider
 {
     public var barCornerRadius: CGFloat = 0
     
+    public var isGradientBarEnabled: Bool = false
+    
     /// if set to true, all values are drawn above their bars, instead of below their top
     private var _drawValueAboveBarEnabled = true
 

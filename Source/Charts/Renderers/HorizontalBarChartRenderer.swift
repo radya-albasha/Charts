@@ -262,16 +262,24 @@ open class HorizontalBarChartRenderer: BarChartRenderer
                 continue
             }
             
-            if !isSingleColor
-            {
-                // Set the color for the currently drawn value. If the index is out of bounds, reuse colors.
-                context.setFillColor(dataSet.color(atIndex: j).cgColor)
-            }
-
-//            context.fill(barRect)
             let bezierPath = UIBezierPath(roundedRect: barRect, cornerRadius:dataProvider.barCornerRadius)
             context.addPath(bezierPath.cgPath)
-            context.drawPath(using: .fill)
+            if !isSingleColor
+            {
+                if !dataProvider.isGradientBarEnabled{
+                    // Set the color for the currently drawn value. If the index is out of bounds, reuse colors.
+                    context.setFillColor(dataSet.color(atIndex: j).cgColor)
+                    context.drawPath(using: .fill)
+                }else{
+                    //if gradientEnabled
+                    let fillColors = dataSet.barGradientColor(at: j) ??
+                    [dataSet.color(atIndex: 0), dataSet.color(atIndex: 1)]
+                    drawGradient(context: context, barRect: barRect, gradientColors: fillColors)
+                }
+            }else{
+                context.drawPath(using: .fill)
+            }
+            // context.fill(barRect)
             if drawBorder
             {
                 context.setStrokeColor(borderColor.cgColor)
@@ -295,6 +303,29 @@ open class HorizontalBarChartRenderer: BarChartRenderer
             }
         }
         
+        context.restoreGState()
+    }
+    open func drawGradient(context: CGContext, barRect: CGRect, gradientColors: Array<NSUIColor>)
+    {
+        let cgColors = gradientColors.map{ $0.cgColor } as CFArray
+        
+        context.saveGState()
+        //need to set a clip path (a rectangle or rounded rectangle in this case), before you draw the gradient.
+        context.clip()
+        // Gradient
+        let locations:[CGFloat] = [1.0, 0.0]
+        let gradient:CGGradient
+        let colorspace:CGColorSpace
+        colorspace = CGColorSpaceCreateDeviceRGB()
+        
+        gradient = CGGradient(colorsSpace: colorspace, colors: cgColors, locations: locations)!
+        
+        //Horizontal Gradient
+        let startPoint:CGPoint = CGPoint(x: barRect.maxX, y: 0.0)
+        let endPoint:CGPoint = CGPoint(x: barRect.minX, y: 0.0)
+        //            let startPoint: CGPoint = CGPoint(x: barRect.minX, y: barRect.midY)
+        //            let endPoint: CGPoint = CGPoint(x: barRect.maxX, y: barRect.midY)
+        context.drawLinearGradient(gradient, start: startPoint, end: endPoint, options: .init(rawValue: 0))
         context.restoreGState()
     }
     

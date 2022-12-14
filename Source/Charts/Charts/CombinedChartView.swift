@@ -16,6 +16,7 @@ import CoreGraphics
 open class CombinedChartView: BarLineChartViewBase, CombinedChartDataProvider
 {
     public var barCornerRadius: CGFloat = 0
+    public var isGradientBarEnabled: Bool = false
     
     /// the fill-formatter used for determining the position of the fill-line
     internal var _fillFormatter: FillFormatter!
